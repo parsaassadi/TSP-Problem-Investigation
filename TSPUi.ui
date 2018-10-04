@@ -6,29 +6,46 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>689</width>
-    <height>520</height>
+    <width>1428</width>
+    <height>832</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>true</bool>
+  </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="verticalLayoutWidget">
+   <widget class="QWidget" name="gridLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>-1</y>
-      <width>661</width>
-      <height>461</height>
+      <x>0</x>
+      <y>29</y>
+      <width>1401</width>
+      <height>741</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="vLay">
-     <item>
+    <layout class="QGridLayout" name="gridLayout" rowstretch="2,0" columnstretch="0" rowminimumheight="0,0" columnminimumwidth="0">
+     <item row="0" column="0">
       <widget class="QWidget" name="plot" native="true"/>
      </item>
-     <item>
-      <layout class="QHBoxLayout" name="hLay">
+     <item row="1" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="execute">
+         <property name="text">
+          <string>Execute</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="addFile">
+         <property name="text">
+          <string>Add File</string>
+         </property>
+        </widget>
+       </item>
        <item>
         <widget class="QRadioButton" name="es">
          <property name="text">
@@ -44,16 +61,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="addFile">
+        <widget class="QLabel" name="timelabel">
          <property name="text">
-          <string>Add File</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="execute">
-         <property name="text">
-          <string>Execute</string>
+          <string>Time</string>
          </property>
         </widget>
        </item>
@@ -67,7 +77,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>689</width>
+     <width>1428</width>
      <height>22</height>
     </rect>
    </property>
