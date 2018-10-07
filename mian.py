@@ -10,6 +10,7 @@ from matplotlib.figure import Figure
 import numpy as np
 from itertools import permutations
 import time
+from PyQt5.QtCore import QThread, pyqtSignal, QCoreApplication, QObject, QRunnable, QThreadPool
 
 
 
@@ -32,8 +33,10 @@ class intro(form, QMainWindow):
         self.fig = Figure()
         self.ax = self.fig.add_axes([0.1,0.1,0.8,0.8])
         self.canvas = f(self.fig)
-        I = QVBoxLayout(self.plot)
-        I.addWidget(self.canvas)
+        self.I = QVBoxLayout(self.plot)
+        self.I.addWidget(self.canvas)
+        self.ax.set_title('TSP Problem')
+        self.ax.patch.set_facecolor('wheat')
 
 
 
@@ -41,6 +44,10 @@ class intro(form, QMainWindow):
         self.cities = []
         self.firstCityToVisit = "None"
         self.exhaustiveSearchRuntime = 'None'
+        self.minimumXPoint = 'None'
+        self.minimumYPoint = 'None'
+        self.maximumXPoint = 'None'
+        self.maximumYPoint = 'None'
 
         self.addFile.clicked.connect(self.addFileCalled)
         self.execute.clicked.connect(self.executeCalled)
@@ -49,9 +56,9 @@ class intro(form, QMainWindow):
         if self.es.isChecked():
             self.exhaustiveSearch(self.cities)
         elif self.nn.isChecked():
-            print('linear')
+            self.nearestNeighbourAlgorithm()
         else:
-            print('Choose an alg!')
+            print('Choose an algorithm!')
 
     def distanceOfTwoPoint(self, point1, point2):
         return np.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2)
@@ -73,18 +80,91 @@ class intro(form, QMainWindow):
         return differentDistancesMadeByEachPermutation
 
     def plotAGivenPermutation(self, perm):
+        self.timelabel.hide()
+        self.distlabel.setText('Algorithm Finished Just Plotting...')
+        redrawingThread = drawingThread(self.canvas)
         cnt = 0
         for point in perm:
             if cnt == len(perm) - 1:
-                self.ax.plot([point.x, perm[0].x], [point.y, perm[0].y], 'bo-')
-            else:
-                self.ax.plot([point.x,perm[cnt + 1].x], [point.y,perm[cnt + 1].y], 'ro-')
-            cnt = cnt + 1
 
+                self.ax.set_ylim(self.minimumYPoint.y - 0.5, self.maximumYPoint.y + 0.5)
+                self.ax.set_xlim(self.minimumXPoint.x - 0.5, self.maximumXPoint.x + 0.5)
+                self.ax.plot([point.x, perm[0].x], [point.y, perm[0].y], 'bo-')
+                self.ax.set_title('TSP Problem')
+                self.ax.patch.set_facecolor('wheat')
+                self.fig.canvas.draw()
+                self.fig.canvas.flush_events()
+                time.sleep(1)
+
+            else:
+
+                self.ax.set_ylim(self.minimumYPoint.y - 0.5, self.maximumYPoint.y + 0.5)
+                self.ax.set_xlim(self.minimumXPoint.x - 0.5, self.maximumXPoint.x + 0.5)
+                self.ax.plot([point.x,perm[cnt + 1].x], [point.y,perm[cnt + 1].y], 'ro-')
+                self.ax.set_title('TSP Problem')
+                self.ax.patch.set_facecolor('wheat')
+                self.fig.canvas.draw()
+                self.fig.canvas.flush_events()
+                time.sleep(1)
+            cnt = cnt + 1
+        self.ax.set_title('TSP Problem')
+        self.ax.patch.set_facecolor('wheat')
+
+    def getNameOfNearestUnvisitedPoint(self, point, indexOfPoint):
+        distanceToallOtherPoints = {}
+        for city in self.cities:
+            if self.cities.index(city) == indexOfPoint:
+                continue
+            else:
+                if city.isVisited == False:
+                    distanceToallOtherPoints[city.name] = self.distanceOfTwoPoint(city, point)
+                else:
+                    continue
+        if distanceToallOtherPoints == {}:
+            return 'end'
+        else:
+            key_min = min(distanceToallOtherPoints.keys(), key=(lambda k: distanceToallOtherPoints[k]))
+            return int(key_min[1:]) - 1
+
+    def nearestNeighbourAlgorithm(self):
+        print('Nearest neighbour started...')
+        for city in self.cities:
+            city.isVisited = False
+        t_start = time.clock()
+        permutaionOfPoints = []
+        totalDistance = 0
+        self.cities[0].isVisited = True
+        permutaionOfPoints.append(self.cities[0])
+        indexOFCurrentCity = 0
+        while self.getNameOfNearestUnvisitedPoint(self.cities[indexOFCurrentCity],indexOFCurrentCity) != 'end':
+            IndexNextCity = self.getNameOfNearestUnvisitedPoint(self.cities[indexOFCurrentCity], indexOFCurrentCity)
+            permutaionOfPoints.append(self.cities[IndexNextCity])
+            totalDistance = totalDistance + self.distanceOfTwoPoint(self.cities[indexOFCurrentCity], self.cities[IndexNextCity])
+            self.cities[IndexNextCity].isVisited = True
+            indexOFCurrentCity = IndexNextCity
+        totalDistance = totalDistance + self.distanceOfTwoPoint(self.cities[indexOFCurrentCity], self.cities[0])
+        t_end = time.clock()
+        delta = t_end - t_start
+        print('------------------------------')
+        print('Nearest neighbour algorithm:')
+        print('Optimum Path:')
+        for index in range(0, self.numberOfCities):
+            print(permutaionOfPoints[index].name, end='-')
+        print(': ', totalDistance)
+        print('Runtime: ', delta)
+        self.ax.clear()
+        self.plotAGivenPermutation(permutaionOfPoints)
         self.canvas.draw()
+        x = delta
+        self.timelabel.show()
+        self.timelabel.setText('Nearest neighbour Runtime = ' + '{:.4e}'.format(x) + 's')
+        x = totalDistance
+        self.distlabel.setText('Nearest neighbour Distance = ' + '{:.4f}'.format(x) + 'Km')
 
     def exhaustiveSearch(self, set):
-        print('Exhaustive Search:')
+        for city in self.cities:
+            city.isVisited = False
+        print('Exhaustive search started...')
         t_start = time.clock()
         allPermutations = permutations(set,len(set))
         allPossiblePermutations = []
@@ -111,6 +191,7 @@ class intro(form, QMainWindow):
         #    cnt = cnt + 1
 
         print('------------------------------')
+        print('Exhaustive Search:')
         print('Optimum Path:')
         for index in range(0,self.numberOfCities):
             print(allPossiblePermutations[IndexOfMinimimDistanceAmongPermutations][index].name,end = '-')
@@ -118,12 +199,13 @@ class intro(form, QMainWindow):
         print('Runtime: ', self.exhaustiveSearchRuntime)
 
         listOfBestPermutation = list(allPossiblePermutations[IndexOfMinimimDistanceAmongPermutations])
+        self.ax.clear()
         self.plotAGivenPermutation(listOfBestPermutation)
-
-
-
-
-
+        x = self.exhaustiveSearchRuntime
+        self.timelabel.show()
+        self.timelabel.setText('Exhaustive seacrh Runtime = ' + '{:.4e}'.format(x) + 's')
+        x = minimumDistanceAmongPermutations
+        self.distlabel.setText('Exhaustive seacrh Distance = ' + '{:.4}'.format(x) + 'Km')
 
 
 
@@ -137,6 +219,7 @@ class intro(form, QMainWindow):
                 linesOfFile = iFile.readlines()
                 linesOfFile = [line.rstrip('\n') for line in open(f[0])]
                 counter = 0
+                self.cities.clear()
                 for element in linesOfFile:
                     if counter == 0:
                         self.numberOfCities = int(element)
@@ -146,12 +229,22 @@ class intro(form, QMainWindow):
                     counter = counter + 1
 
                 self.firstCityToVisit = self.cities[0]
+                self.minimumXPoint = min(self.cities, key=(lambda k: k.x))
+                self.minimumYPoint = min(self.cities, key=(lambda k: k.y))
+                self.maximumXPoint = max(self.cities, key=(lambda k: k.x))
+                self.maximumYPoint = max(self.cities, key=(lambda k: k.y))
+                self.ax.set_ylim(self.minimumYPoint.y - 0.5, self.maximumYPoint.y + 0.5)
+                self.ax.set_xlim(self.minimumXPoint.x - 0.5, self.maximumXPoint.x + 0.5)
+                self.canvas.draw()
 
-        self.exhaustiveSearch(self.cities)
 
 
 
-
+class drawingThread(QThread):
+    def __init__(self, canvas):
+        self.canv = canvas
+    def run(self):
+        self.canv.draw()
 app = QApplication(sys.argv)
 w = intro()
 w.resize(1400,900)
