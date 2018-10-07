@@ -87,6 +87,8 @@ class intro(form, QMainWindow):
         for point in perm:
             if cnt == len(perm) - 1:
 
+                for city in self.cities:
+                    self.ax.plot([city.x],[city.y],marker='o', markersize=7, color="red")
                 self.ax.set_ylim(self.minimumYPoint.y - 0.5, self.maximumYPoint.y + 0.5)
                 self.ax.set_xlim(self.minimumXPoint.x - 0.5, self.maximumXPoint.x + 0.5)
                 self.ax.plot([point.x, perm[0].x], [point.y, perm[0].y], 'bo-')
@@ -98,6 +100,8 @@ class intro(form, QMainWindow):
 
             else:
 
+                for city in self.cities:
+                    self.ax.plot([city.x],[city.y],marker='o', markersize=7, color="red")
                 self.ax.set_ylim(self.minimumYPoint.y - 0.5, self.maximumYPoint.y + 0.5)
                 self.ax.set_xlim(self.minimumXPoint.x - 0.5, self.maximumXPoint.x + 0.5)
                 self.ax.plot([point.x,perm[cnt + 1].x], [point.y,perm[cnt + 1].y], 'ro-')
@@ -235,6 +239,8 @@ class intro(form, QMainWindow):
                 self.maximumYPoint = max(self.cities, key=(lambda k: k.y))
                 self.ax.set_ylim(self.minimumYPoint.y - 0.5, self.maximumYPoint.y + 0.5)
                 self.ax.set_xlim(self.minimumXPoint.x - 0.5, self.maximumXPoint.x + 0.5)
+                for city in self.cities:
+                    self.ax.plot([city.x],[city.y],marker='o', markersize=7, color="red")
                 self.canvas.draw()
 
 
