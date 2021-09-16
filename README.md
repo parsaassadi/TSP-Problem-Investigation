@@ -4,6 +4,8 @@ In this project, two well-known methods are used to generate a solution for TSP,
 
 We know that Nearest Neighnour is faster, but only gives a sub optimal solution.
 
+# Example of animated runtime:
+
 https://user-images.githubusercontent.com/36506099/133543118-6a16366a-17bd-45e9-940d-e2d4cd6477c9.mov
 
 
