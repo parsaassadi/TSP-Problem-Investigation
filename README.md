@@ -1,2 +1,2 @@
-# TSP-Problem-Investigation
-investigating two main approach for solving TSP Problem
+# Travelling Salesman Problem Investigation
+In this project, two well-known approach is used to come up with a solution for TSP, a famous problem in algorithm. A PyQt based GUI is designed for the user to query lon/lat of all cities, and choose one of the approaches (Nearest Neighbor, Exhaustive Search) for solving the problem. The GUI shows the optimum path in a sequential manner for the user, and compare the time complexity, and optimality of each of these methods
